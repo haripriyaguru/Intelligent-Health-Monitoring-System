@@ -1,0 +1,547 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results - Health Assistant{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient border-primary shadow">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="text-white fw-bold mb-0">Health Analysis Results</h1>
+                            <p class="text-muted mt-2">{{ record.created_at }}</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-lg">
+                                <i class="bi bi-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overall Health Score -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow border-primary">
+                <div class="card-body text-center py-5">
+                    <h3 class="text-muted">Overall Health Score</h3>
+                    <div class="score-circle-large mx-auto mb-3">
+                        <span class="score-text">{{ record.health_score }}</span>
+                    </div>
+                    <h2 class="text-primary fw-bold">{{ record.predicted_condition }}</h2>
+                    <p class="text-muted mt-2">
+                        {% if record.health_score >= 80 %}
+                            <span class="badge bg-success">Excellent Health Status</span>
+                        {% elif record.health_score >= 60 %}
+                            <span class="badge bg-info">Good Health</span>
+                        {% elif record.health_score >= 40 %}
+                            <span class="badge bg-warning">Fair Health - Minor Improvements Suggested</span>
+                        {% else %}
+                            <span class="badge bg-danger">Poor Health - Urgent Improvements Recommended</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analysis Details -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card analysis-card h-100 shadow-sm border-primary">
+                <div class="card-body text-center">
+                    <i class="bi bi-eye text-primary" style="font-size:2.5rem;"></i>
+                    <h5 class="card-title mt-3">Eye Analysis</h5>
+                    <p class="card-text fw-bold text-primary">{{ record.eye_status }}</p>
+                    <small class="text-muted">Eyes show signs of {{ record.eye_status|lower }}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card analysis-card h-100 shadow-sm border-primary">
+                <div class="card-body text-center">
+                    <i class="bi bi-mouth text-primary" style="font-size:2.5rem;"></i>
+                    <h5 class="card-title mt-3">Tongue Analysis</h5>
+                    <p class="card-text fw-bold text-primary">{{ record.tongue_status }}</p>
+                    <small class="text-muted">Tongue appears {{ record.tongue_status|lower }}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card analysis-card h-100 shadow-sm border-primary">
+                <div class="card-body text-center">
+                    <i class="bi bi-person text-primary" style="font-size:2.5rem;"></i>
+                    <h5 class="card-title mt-3">Posture Analysis</h5>
+                    <p class="card-text fw-bold text-primary">{{ record.posture_status }}</p>
+                    <small class="text-muted">Posture is {{ record.posture_status|lower }}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card analysis-card h-100 shadow-sm border-primary">
+                <div class="card-body text-center">
+                    <i class="bi bi-mic text-primary" style="font-size:2.5rem;"></i>
+                    <h5 class="card-title mt-3">Speech Analysis</h5>
+                    <p class="card-text fw-bold text-primary">{{ record.speech_status }}</p>
+                    <small class="text-muted">Speech pattern: {{ record.speech_status|lower }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nutrition & Meal Plan -->
+    {% if record.meal_plan %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="bi bi-apple"></i> Personalized Nutrition Plan (USDA Based)</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Calorie Information -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-success">{{ record.maintenance_calories|round|int }}</h3>
+                                <p class="text-muted">Maintenance Calories</p>
+                                <small>Daily calories to maintain weight</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-primary">{{ record.target_calories|round|int }}</h3>
+                                <p class="text-muted">Target Calories</p>
+                                <small>Adjusted for your goal</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                {% if record.meal_plan.macros %}
+                                <h3 class="text-info">{{ record.meal_plan.macros.protein|round(0) }}g</h3>
+                                <p class="text-muted">Daily Protein</p>
+                                <small>{{ record.meal_plan.macros.carbohydrates|round(0) }}g carbs, {{ record.meal_plan.macros.fat|round(0) }}g fat</small>
+                                {% else %}
+                                <p class="text-muted">Nutritional data pending</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Summary -->
+                    {% if record.nutrition_info %}
+                    <div class="alert alert-light border">
+                        <h6 class="fw-bold mb-2">Your Profile</h6>
+                        <div class="row text-center">
+                            <div class="col-2"><strong>{{ record.nutrition_info.get('height', 'N/A') }}cm</strong><br><small>Height</small></div>
+                            <div class="col-2"><strong>{{ record.nutrition_info.get('weight', 'N/A') }}kg</strong><br><small>Weight</small></div>
+                            <div class="col-2"><strong>{{ record.nutrition_info.get('age', 'N/A') }}</strong><br><small>Age</small></div>
+                            <div class="col-2"><strong>{{ record.nutrition_info.get('gender', 'N/A')|title }}</strong><br><small>Gender</small></div>
+                            <div class="col-2"><strong>{{ record.nutrition_info.get('activity_level', 'N/A')|title }}</strong><br><small>Activity</small></div>
+                            <div class="col-2"><strong>{{ record.nutrition_info.get('goal', 'N/A')|title }}</strong><br><small>Goal</small></div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Meal Plan -->
+                    {% if record.meal_plan %}
+                    <h5 class="text-success fw-bold mb-3 mt-4">🍽️ Daily Meal Plan ({{ record.meal_plan.total_calories|round|int }} calories)</h5>
+
+                    <div class="row">
+                        <!-- Breakfast -->
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="card h-100 border-warning">
+                                <div class="card-header bg-warning text-white text-center">
+                                    <h6 class="mb-0">🌅 Breakfast</h6>
+                                    <small class="text-white-50">{{ "%.0f"|format(record.meal_plan.total_calories * 0.30) }} cal</small>
+                                </div>
+                                <div class="card-body">
+                                    {% for food in record.meal_plan.breakfast %}
+                                    <div class="mb-3 p-2 border rounded">
+                                        <strong class="text-primary">{{ food.name }}</strong><br>
+                                        <small class="text-muted d-block mb-1">
+                                            <strong>{{ food.calories|round(0) }} cal</strong> |
+                                            P:{{ food.protein|round(1) }}g C:{{ food.carbohydrates|round(1) }}g F:{{ food.fat|round(1) }}g
+                                            {% if food.fiber %}
+                                            Fiber:{{ food.fiber|round(1) }}g
+                                            {% endif %}
+                                        </small>
+                                        {% if food.vitamins %}
+                                        <small class="text-success d-block">
+                                            <strong>Vitamins:</strong>
+                                            {% for vitamin, amount in food.vitamins.items() %}
+                                            {{ vitamin|replace('_', ' ')|title }}:{{ amount|round(1) }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                        {% endif %}
+                                        {% if food.minerals %}
+                                        <small class="text-info d-block">
+                                            <strong>Minerals:</strong>
+                                            {% for mineral, amount in food.minerals.items() %}
+                                            {{ mineral|title }}:{{ amount|round(1) }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lunch -->
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="card h-100 border-info">
+                                <div class="card-header bg-info text-white text-center">
+                                    <h6 class="mb-0">🌞 Lunch</h6>
+                                    <small class="text-white-50">{{ "%.0f"|format(record.meal_plan.total_calories * 0.40) }} cal</small>
+                                </div>
+                                <div class="card-body">
+                                    {% for food in record.meal_plan.lunch %}
+                                    <div class="mb-3 p-2 border rounded">
+                                        <strong class="text-primary">{{ food.name }}</strong><br>
+                                        <small class="text-muted d-block mb-1">
+                                            <strong>{{ food.calories|round(0) }} cal</strong> |
+                                            P:{{ food.protein|round(1) }}g C:{{ food.carbohydrates|round(1) }}g F:{{ food.fat|round(1) }}g
+                                            {% if food.fiber %}
+                                            Fiber:{{ food.fiber|round(1) }}g
+                                            {% endif %}
+                                        </small>
+                                        {% if food.vitamins %}
+                                        <small class="text-success d-block">
+                                            <strong>Vitamins:</strong>
+                                            {% for vitamin, amount in food.vitamins.items() %}
+                                            {{ vitamin|replace('_', ' ')|title }}:{{ amount|round(1) }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                        {% endif %}
+                                        {% if food.minerals %}
+                                        <small class="text-info d-block">
+                                            <strong>Minerals:</strong>
+                                            {% for mineral, amount in food.minerals.items() %}
+                                            {{ mineral|title }}:{{ amount|round(1) }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dinner -->
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="card h-100 border-danger">
+                                <div class="card-header bg-danger text-white text-center">
+                                    <h6 class="mb-0">🌙 Dinner</h6>
+                                    <small class="text-white-50">{{ "%.0f"|format(record.meal_plan.total_calories * 0.25) }} cal</small>
+                                </div>
+                                <div class="card-body">
+                                    {% for food in record.meal_plan.dinner %}
+                                    <div class="mb-3 p-2 border rounded">
+                                        <strong class="text-primary">{{ food.name }}</strong><br>
+                                        <small class="text-muted d-block mb-1">
+                                            <strong>{{ food.calories|round(0) }} cal</strong> |
+                                            P:{{ food.protein|round(1) }}g C:{{ food.carbohydrates|round(1) }}g F:{{ food.fat|round(1) }}g
+                                            {% if food.fiber %}
+                                            Fiber:{{ food.fiber|round(1) }}g
+                                            {% endif %}
+                                        </small>
+                                        {% if food.vitamins %}
+                                        <small class="text-success d-block">
+                                            <strong>Vitamins:</strong>
+                                            {% for vitamin, amount in food.vitamins.items() %}
+                                            {{ vitamin|replace('_', ' ')|title }}:{{ amount|round(1) }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                        {% endif %}
+                                        {% if food.minerals %}
+                                        <small class="text-info d-block">
+                                            <strong>Minerals:</strong>
+                                            {% for mineral, amount in food.minerals.items() %}
+                                            {{ mineral|title }}:{{ amount|round(1) }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Snacks -->
+                        <div class="col-md-6 col-lg-3 mb-3">
+                            <div class="card h-100 border-success">
+                                <div class="card-header bg-success text-white text-center">
+                                    <h6 class="mb-0">🍿 Snacks</h6>
+                                    <small class="text-white-50">{{ "%.0f"|format(record.meal_plan.total_calories * 0.05) }} cal</small>
+                                </div>
+                                <div class="card-body">
+                                    {% for food in record.meal_plan.snacks %}
+                                    <div class="mb-3 p-2 border rounded">
+                                        <strong class="text-primary">{{ food.name }}</strong><br>
+                                        <small class="text-muted d-block mb-1">
+                                            <strong>{{ food.calories|round(0) }} cal</strong> |
+                                            P:{{ food.protein|round(1) }}g C:{{ food.carbohydrates|round(1) }}g F:{{ food.fat|round(1) }}g
+                                            {% if food.fiber %}
+                                            Fiber:{{ food.fiber|round(1) }}g
+                                            {% endif %}
+                                        </small>
+                                        {% if food.vitamins %}
+                                        <small class="text-success d-block">
+                                            <strong>Vitamins:</strong>
+                                            {% for vitamin, amount in food.vitamins.items() %}
+                                            {{ vitamin|replace('_', ' ')|title }}:{{ amount|round(1) }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                        {% endif %}
+                                        {% if food.minerals %}
+                                        <small class="text-info d-block">
+                                            <strong>Minerals:</strong>
+                                            {% for mineral, amount in food.minerals.items() %}
+                                            {{ mineral|title }}:{{ amount|round(1) }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nutritional Summary -->
+                    {% if record.meal_plan.nutritional_summary %}
+                    <div class="mt-4">
+                        <h5 class="text-primary fw-bold mb-3">📊 Daily Nutritional Summary</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card border-primary">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0">Macronutrients</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row text-center">
+                                            <div class="col-6">
+                                                <div class="p-2">
+                                                    <h4 class="text-primary">{{ record.meal_plan.nutritional_summary.total_calories|round(0) }}</h4>
+                                                    <small class="text-muted">Total Calories</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-2">
+                                                    <h4 class="text-success">{{ record.meal_plan.nutritional_summary.total_protein|round(1) }}g</h4>
+                                                    <small class="text-muted">Protein</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-2">
+                                                    <h4 class="text-warning">{{ record.meal_plan.nutritional_summary.total_carbs|round(1) }}g</h4>
+                                                    <small class="text-muted">Carbs</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-2">
+                                                    <h4 class="text-danger">{{ record.meal_plan.nutritional_summary.total_fat|round(1) }}g</h4>
+                                                    <small class="text-muted">Fat</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0">Key Vitamins & Minerals</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        {% if record.meal_plan.nutritional_summary.vitamins %}
+                                        <div class="mb-3">
+                                            <strong class="text-success">Vitamins:</strong>
+                                            <div class="row">
+                                                {% for vitamin, amount in record.meal_plan.nutritional_summary.vitamins.items() %}
+                                                <div class="col-6 mb-1">
+                                                    <small>{{ vitamin|replace('_', ' ')|title }}: {{ amount|round(1) }}</small>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% if record.meal_plan.nutritional_summary.minerals %}
+                                        <div>
+                                            <strong class="text-info">Minerals:</strong>
+                                            <div class="row">
+                                                {% for mineral, amount in record.meal_plan.nutritional_summary.minerals.items() %}
+                                                <div class="col-6 mb-1">
+                                                    <small>{{ mineral|title }}: {{ amount|round(1) }}</small>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Condition-Based Recommendations -->
+                    {% if record.condition_recommendations %}
+                    <div class="mt-4">
+                        <h5 class="text-warning fw-bold mb-3">🎯 Health Condition Recommendations</h5>
+                        {% for condition, foods in record.condition_recommendations.items() %}
+                        <div class="alert alert-warning">
+                            <h6 class="fw-bold text-capitalize">{{ condition.replace('_', ' ') }}</h6>
+                            <ul class="mb-0">
+                                {% for food in foods %}
+                                <li>{{ food }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Additional Resources -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card shadow border-primary">
+                <div class="card-body">
+                    <h5 class="text-primary fw-bold mb-3"><i class="bi bi-hospital"></i> Find Medical Help</h5>
+                    <p class="text-muted">If you have concerns about your health results, find nearby hospitals</p>
+                    <button class="btn btn-primary" onclick="findHospitals()">Find Nearby Hospitals</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow border-primary">
+                <div class="card-body">
+                    <h5 class="text-primary fw-bold mb-3"><i class="bi bi-arrow-repeat"></i> New Analysis</h5>
+                    <p class="text-muted">Run another health analysis to track your progress</p>
+                    <a href="{{ url_for('analyze') }}" class="btn btn-primary">Start New Analysis</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Button -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <button class="btn btn-secondary me-2" onclick="window.print()">
+                <i class="bi bi-printer"></i> Print Report
+            </button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                <i class="bi bi-house"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #0d6efd 0%, #0f5ad3 100%) !important;
+        color: white !important;
+    }
+
+    .score-circle-large {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0d6efd, #0f5ad3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .score-text {
+        font-size: 4rem;
+        font-weight: bold;
+    }
+
+    .analysis-card {
+        transition: all 0.3s ease;
+        border: 2px solid #0d6efd !important;
+    }
+
+    .analysis-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.2) !important;
+    }
+
+    .meal-box {
+        border-left: 4px solid #0d6efd !important;
+    }
+
+    .border-left-primary {
+        border-left: 4px solid #0d6efd !important;
+    }
+
+    @media print {
+        .btn, nav, footer {
+            display: none;
+        }
+    }
+</style>
+
+<script>
+function findHospitals() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const data = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+            };
+            
+            fetch('{{ url_for("get_hospitals") }}', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showHospitalsInfo(data.hospitals);
+            });
+        });
+    } else {
+        alert('Geolocation is not supported by your browser');
+    }
+}
+
+function showHospitalsInfo(hospitals) {
+    let html = '<div class="table-responsive"><table class="table table-striped">' +
+               '<thead><tr><th>Hospital Name</th><th>Address</th><th>Distance</th><th>Phone</th><th>Rating</th></tr></thead><tbody>';
+    
+    hospitals.forEach(h => {
+        html += `<tr>
+            <td><strong>${h.name}</strong></td>
+            <td>${h.address}</td>
+            <td>${h.distance} km</td>
+            <td><a href="tel:${h.phone}">${h.phone}</a></td>
+            <td><span class="badge bg-success">${h.rating}★</span></td>
+        </tr>`;
+    });
+    
+    html += '</tbody></table></div>';
+    
+    alert('Found ' + hospitals.length + ' nearby hospitals');
+    console.log(hospitals);
+}
+</script>
+{% endblock %}

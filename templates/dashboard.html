@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Health Assistant{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient border-primary shadow">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="text-white fw-bold mb-0">Welcome, {{ session.user_name }}!</h1>
+                            <p class="text-muted mt-2">Monitor your health with AI-powered analysis</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-lg fw-bold">
+                                <i class="bi bi-heart-pulse"></i> Start Analysis
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Stats Overview -->
+    {% if stats %}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Total Analyses</h6>
+                    <h3 class="text-primary fw-bold">{{ stats.total_records }}</h3>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-success h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Average Score</h6>
+                    <h3 class="text-success fw-bold">{{ "%.0f"|format(stats.avg_health_score or 0) }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-warning h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Best Score</h6>
+                    <h3 class="text-warning fw-bold">{{ stats.best_score or 0 }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-danger h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Lowest Score</h6>
+                    <h3 class="text-danger fw-bold">{{ stats.worst_score or 0 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Latest Analysis Result -->
+    {% if latest_record %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-primary shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Latest Health Analysis</h5>
+                    <small>{{ latest_record.created_at }}</small>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-2 text-center mb-3">
+                            <div class="analysis-box">
+                                <div class="score-circle bg-primary text-white mx-auto mb-2" style="width:70px; height:70px; line-height:35px; border-radius:50%;">
+                                    <span class="fw-bold" style="font-size:1.5rem;">{{ latest_record.health_score }}</span>
+                                </div>
+                                <h6>Health Score</h6>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-2 text-center mb-3">
+                            <div class="analysis-box">
+                                <i class="bi bi-eye text-primary" style="font-size:2.5rem;"></i>
+                                <p class="mt-2 small"><strong>Eyes</strong></p>
+                                <span class="badge bg-info">{{ latest_record.eye_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-2 text-center mb-3">
+                            <div class="analysis-box">
+                                <i class="bi bi-mouth text-primary" style="font-size:2.5rem;"></i>
+                                <p class="mt-2 small"><strong>Tongue</strong></p>
+                                <span class="badge bg-info">{{ latest_record.tongue_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-2 text-center mb-3">
+                            <div class="analysis-box">
+                                <i class="bi bi-person text-primary" style="font-size:2.5rem;"></i>
+                                <p class="mt-2 small"><strong>Posture</strong></p>
+                                <span class="badge bg-info">{{ latest_record.posture_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-2 text-center mb-3">
+                            <div class="analysis-box">
+                                <i class="bi bi-mic text-primary" style="font-size:2.5rem;"></i>
+                                <p class="mt-2 small"><strong>Speech</strong></p>
+                                <span class="badge bg-info">{{ latest_record.speech_status }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-lg-2 text-center mb-3">
+                            <div class="analysis-box">
+                                <i class="bi bi-heart-pulse text-primary" style="font-size:2.5rem;"></i>
+                                <p class="mt-2 small"><strong>Health</strong></p>
+                                <span class="badge bg-success">{{ latest_record.predicted_condition }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <a href="{{ url_for('results', record_id=latest_record.id) }}" class="btn btn-primary">
+                                <i class="bi bi-file-earmark"></i> View Full Report
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-info shadow">
+                <div class="card-body text-center py-5">
+                    <h4 class="text-info">No Analysis Yet</h4>
+                    <p class="text-muted">Start your first health analysis to see results here</p>
+                    <a href="{{ url_for('analyze') }}" class="btn btn-primary">
+                        <i class="bi bi-heart-pulse"></i> Start Analysis
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Features Grid -->
+    <div class="row mt-5">
+        <div class="col-12 mb-4">
+            <h3 class="text-primary fw-bold">Health Analysis Modules</h3>
+        </div>
+
+        <!-- Eye Analysis -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card feature-module border-primary shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-eye text-primary" style="font-size:2rem;"></i>
+                        <h5 class="card-title ms-3 mb-0">Eye Analysis</h5>
+                    </div>
+                    <p class="text-muted">Analyze eye strain, fatigue, and blink detection</p>
+                    <ul class="small text-muted">
+                        <li>Eye strain detection</li>
+                        <li>Fatigue assessment</li>
+                        <li>Blink rate analysis</li>
+                    </ul>
+                    <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-sm mt-3">Analyze Eyes</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tongue Analysis -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card feature-module border-primary shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-mouth text-primary" style="font-size:2rem;"></i>
+                        <h5 class="card-title ms-3 mb-0">Tongue Analysis</h5>
+                    </div>
+                    <p class="text-muted">Detect dehydration and digestion issues</p>
+                    <ul class="small text-muted">
+                        <li>Color analysis</li>
+                        <li>Texture assessment</li>
+                        <li>Health indicators</li>
+                    </ul>
+                    <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-sm mt-3">Analyze Tongue</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Posture Analysis -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card feature-module border-primary shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-person text-primary" style="font-size:2rem;"></i>
+                        <h5 class="card-title ms-3 mb-0">Posture Analysis</h5>
+                    </div>
+                    <p class="text-muted">Detect slouching and proper body alignment</p>
+                    <ul class="small text-muted">
+                        <li>Posture scoring</li>
+                        <li>Alignment detection</li>
+                        <li>Slouching check</li>
+                    </ul>
+                    <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-sm mt-3">Analyze Posture</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Speech Analysis -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card feature-module border-primary shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-mic text-primary" style="font-size:2rem;"></i>
+                        <h5 class="card-title ms-3 mb-0">Speech Analysis</h5>
+                    </div>
+                    <p class="text-muted">Analyze speech patterns and stress levels</p>
+                    <ul class="small text-muted">
+                        <li>Speech speed analysis</li>
+                        <li>Stress detection</li>
+                        <li>Voice stability</li>
+                    </ul>
+                    <a href="{{ url_for('analyze') }}" class="btn btn-primary btn-sm mt-3">Analyze Speech</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diet Recommendations -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card feature-module border-primary shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-cup text-primary" style="font-size:2rem;"></i>
+                        <h5 class="card-title ms-3 mb-0">Diet Plans</h5>
+                    </div>
+                    <p class="text-muted">Get personalized diet recommendations</p>
+                    <ul class="small text-muted">
+                        <li>Meal planning</li>
+                        <li>Hydration advice</li>
+                        <li>Nutrition tips</li>
+                    </ul>
+                    {% if latest_record %}
+                    <a href="{{ url_for('results', record_id=latest_record.id) }}" class="btn btn-primary btn-sm mt-3">View Diet Plan</a>
+                    {% else %}
+                    <button class="btn btn-primary btn-sm mt-3" disabled>View Diet Plan</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Hospital Locator -->
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card feature-module border-primary shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-hospital text-primary" style="font-size:2rem;"></i>
+                        <h5 class="card-title ms-3 mb-0">Hospital Finder</h5>
+                    </div>
+                    <p class="text-muted">Find nearby hospitals and medical facilities</p>
+                    <ul class="small text-muted">
+                        <li>Location-based search</li>
+                        <li>Distance calculation</li>
+                        <li>Contact information</li>
+                    </ul>
+                    <button class="btn btn-primary btn-sm mt-3" onclick="findHospitals()">Find Hospitals</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #0d6efd 0%, #0f5ad3 100%) !important;
+        color: white !important;
+    }
+
+    .analysis-box {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .analysis-box:hover {
+        background: #e9ecef;
+        transform: translateY(-3px);
+    }
+
+    .feature-module {
+        transition: all 0.3s ease;
+        border: 2px solid #0d6efd !important;
+    }
+
+    .feature-module:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.2) !important;
+    }
+</style>
+
+<script src="{{ url_for('static', filename='js/camera.js') }}"></script>
+<script>
+function findHospitals() {
+    // Redirect to hospital finder page
+    window.location.href = '{{ url_for("hospitals") }}';
+}
+</script>
+{% endblock %}

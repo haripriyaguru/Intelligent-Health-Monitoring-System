@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Find Nearby Hospitals - Health Assistant{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient border-danger shadow">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="text-white fw-bold mb-0">
+                                <i class="bi bi-hospital"></i> Find Nearby Hospitals
+                            </h1>
+                            <p class="text-muted mt-2">Locate emergency hospitals and medical facilities near you</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light">
+                                <i class="bi bi-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row g-3" style="min-height: 70vh;">
+        <!-- Map Column -->
+        <div class="col-lg-8 col-md-12">
+            <div class="card shadow-sm h-100">
+                <div class="card-body p-0">
+                    <!-- Loading Spinner -->
+                    <div id="loadingSpinner" class="spinner-overlay" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3 text-muted">Fetching nearby hospitals...</p>
+                    </div>
+
+                    <!-- Error Alert -->
+                    <div id="errorAlert" class="alert alert-danger alert-dismissible fade show m-3" style="display: none;" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span id="errorMessage"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- No Results Alert -->
+                    <div id="noResultsAlert" class="alert alert-info alert-dismissible fade show m-3" style="display: none;" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        <span id="noResultsMessage">No hospitals found in your area.</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Location Status -->
+                    <div id="locationStatus" class="alert alert-info m-3" style="display: none;"></div>
+
+                    <!-- Manual Location Selector -->
+                    <div class="p-3 border-bottom">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-6">
+                                <select id="citySelect" class="form-select">
+                                    <option value="">Select City</option>
+                                    <option value="13.0827,80.2707">Chennai</option>
+                                    <option value="12.9716,77.5946">Bangalore</option>
+                                    <option value="28.6139,77.2090">Delhi</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button onclick="useSelectedCity()" class="btn btn-primary w-100">
+                                    Use Selected Location
+                                </button>
+                            </div>
+                            <div class="col-md-3">
+                                <button onclick="hospitalMapInstance.getUserLocation()" class="btn btn-secondary w-100">
+                                    Retry Location
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Map -->
+                    <div id="map" style="width: 100%; height: 600px; border-radius: 0.25rem;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hospitals List Column -->
+        <div class="col-lg-4 col-md-12">
+            <div class="card shadow-sm h-100" style="max-height: 700px; overflow-y: auto;">
+                <div class="card-header bg-danger text-white sticky-top">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ul"></i> Nearby Hospitals
+                        <span id="hospitalCount" class="badge bg-white text-danger ms-2">0</span>
+                    </h5>
+                </div>
+                <div id="hospitalsList" class="card-body p-0">
+                    <!-- Hospitals will be dynamically inserted here -->
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-hospital" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <p class="mt-3">Enable location access to find hospitals</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSS Styles -->
+<style>
+    /* Spinner Overlay */
+    .spinner-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-items: center;
+        justify-content: center;
+        z-index: 1000;
+        border-radius: 0.25rem;
+    }
+
+    #map {
+        position: relative;
+    }
+
+    /* Hospital Card Styles */
+    .hospital-card {
+        border-left: 4px solid #dc3545;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .hospital-card:hover {
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.15);
+    }
+
+    .hospital-card.active {
+        background-color: #fff5f5;
+        border-left-color: #c82333;
+    }
+
+    .hospital-name {
+        font-weight: 600;
+        color: #dc3545;
+        margin-bottom: 0.5rem;
+    }
+
+    .hospital-distance {
+        display: inline-block;
+        background: #e7d4d4;
+        color: #dc3545;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .hospital-info {
+        font-size: 0.9rem;
+        color: #666;
+        margin: 0.4rem 0;
+    }
+
+    .hospital-info i {
+        width: 20px;
+        color: #dc3545;
+    }
+
+    .btn-directions {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: background 0.3s ease;
+        display: inline-block;
+        margin-top: 0.5rem;
+    }
+
+    .btn-directions:hover {
+        background: #c82333;
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Leaflet Popup Styles */
+    .hospital-popup {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .hospital-popup h6 {
+        color: #dc3545;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .hospital-popup p {
+        margin: 0.25rem 0;
+        font-size: 0.9rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        #map {
+            height: 400px;
+        }
+
+        .card:has(#hospitalsList) {
+            max-height: 500px;
+        }
+    }
+
+    /* Scrollbar styling */
+    #hospitalsList::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #hospitalsList::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    #hospitalsList::-webkit-scrollbar-thumb {
+        background: #dc3545;
+        border-radius: 3px;
+    }
+
+    #hospitalsList::-webkit-scrollbar-thumb:hover {
+        background: #c82333;
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #999;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        opacity: 0.3;
+        margin-bottom: 1rem;
+    }
+</style>
+
+<!-- Leaflet.js scripts -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<!-- Hospital Map Script -->
+<script src="{{ url_for('static', filename='js/hospital_map.js') }}"></script>
+
+<script>
+    // Initialize hospital map when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if user is logged in (session exists)
+        const hospitalMap = new HospitalMap({
+            mapElementId: 'map',
+            hospitalsListId: 'hospitalsList',
+            hospitalCountId: 'hospitalCount',
+            loadingSpinnerId: 'loadingSpinner',
+            errorAlertId: 'errorAlert',
+            errorMessageId: 'errorMessage',
+            noResultsAlertId: 'noResultsAlert',
+            noResultsMessageId: 'noResultsMessage'
+        });
+
+        // Initialize map and request geolocation
+        hospitalMap.init();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Health Assistant{% endblock %}
+
+{% block content %}
+<div class="hero-section bg-gradient py-5">
+    <div class="container text-center text-white">
+        <h1 class="display-3 fw-bold mb-4">AI-Powered Health Assistant</h1>
+        <p class="lead mb-4">Monitor your health using advanced AI analysis of eye movement, tongue images, posture, and speech patterns</p>
+        
+        {% if not session.user_id %}
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">Get Started</a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">Login</a>
+            </div>
+        {% else %}
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg">Go to Dashboard</a>
+                <a href="{{ url_for('analyze') }}" class="btn btn-outline-light btn-lg">Start Analysis</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Features Section -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <h2 class="text-center mb-5 text-primary fw-bold">Key Features</h2>
+        
+        <div class="row g-4">
+            <!-- Eye Analysis -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm border-primary feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-eye text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Eye Analysis</h5>
+                        <p class="card-text">Detect eye strain and fatigue using advanced image processing</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tongue Analysis -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm border-primary feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-mouth text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Tongue Analysis</h5>
+                        <p class="card-text">Analyze tongue color and texture for health indicators</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Posture Detection -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm border-primary feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-person text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Posture Analysis</h5>
+                        <p class="card-text">Detect posture issues using skeleton tracking</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Speech Analysis -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm border-primary feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-mic text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Speech Analysis</h5>
+                        <p class="card-text">Analyze speech patterns to detect stress levels</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diet Recommendations -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm border-primary feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-cup text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Diet Advice</h5>
+                        <p class="card-text">Get personalized diet recommendations based on analysis</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Prediction -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm border-primary feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-heart-pulse text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Health Prediction</h5>
+                        <p class="card-text">Get AI-powered health predictions and insights</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hospital Locator -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm border-primary feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-hospital text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Hospital Finder</h5>
+                        <p class="card-text">Find nearby hospitals and medical facilities</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Tracking -->
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 shadow-sm border-primary feature-card">
+                    <div class="card-body text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="bi bi-graph-up text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Health Tracking</h5>
+                        <p class="card-text">Track your health progress over time with detailed records</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5 text-primary fw-bold">How It Works</h2>
+        
+        <div class="row g-4">
+            <div class="col-md-3 text-center">
+                <div class="step-number bg-primary text-white rounded-circle mx-auto mb-3" style="width:60px; height:60px; line-height:60px;">1</div>
+                <h5>Create Account</h5>
+                <p>Sign up and create your health profile</p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="step-number bg-primary text-white rounded-circle mx-auto mb-3" style="width:60px; height:60px; line-height:60px;">2</div>
+                <h5>Upload Data</h5>
+                <p>Upload images and audio files for analysis</p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="step-number bg-primary text-white rounded-circle mx-auto mb-3" style="width:60px; height:60px; line-height:60px;">3</div>
+                <h5>AI Analysis</h5>
+                <p>Our AI analyzes your data and generates insights</p>
+            </div>
+            
+            <div class="col-md-3 text-center">
+                <div class="step-number bg-primary text-white rounded-circle mx-auto mb-3" style="width:60px; height:60px; line-height:60px;">4</div>
+                <h5>Get Results</h5>
+                <p>Receive personalized recommendations and advice</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <h2 class="text-center mb-5 text-primary fw-bold">Frequently Asked Questions</h2>
+        
+        <div class="accordion" id="faqAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                        Is this a medical diagnostic tool?
+                    </button>
+                </h2>
+                <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        This is an AI-based health monitoring assistant, not a medical diagnostic tool. Always consult healthcare professionals for medical diagnosis and treatment.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                        How accurate are the predictions?
+                    </button>
+                </h2>
+                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        The predictions are based on AI models and should be used as informational guidance only. Accuracy varies based on input data quality and completeness.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                        Is my data secure?
+                    </button>
+                </h2>
+                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        We implement standard security measures to protect your data. However, transmit sensitive information at your own risk and never share medical records unnecessarily.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                        What image formats are supported?
+                    </button>
+                </h2>
+                <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        We support PNG, JPG, and GIF formats for images. For audio, WAV and MP3 formats are supported.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #0d6efd 0%, #0f5ad3 100%);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+    }
+
+    .feature-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid #0d6efd !important;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.2) !important;
+    }
+</style>
+{% endblock %}
