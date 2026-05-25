@@ -1,4 +1,3 @@
-setuptools
 Flask==2.3.2
 Flask-Session==0.4.0
 mysql-connector-python==8.0.33
